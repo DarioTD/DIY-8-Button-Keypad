@@ -1,6 +1,7 @@
 /*
  
 Copyright (c) 2019, Charles Garcia
+Copyright (c) 2021, Dario Tabares
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,80 +34,100 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 #include <Bounce2.h>
 
 // Change if adding more or less buttons
-#define NUMKEYS 8
+#define NUMKEYS 2
 
 // Edit the buttons you want pressed here
 #define KEY_1 'z'
 #define KEY_2 'x'
-#define KEY_3 'c'
-#define KEY_4 'v'
-#define KEY_5 'a'
-#define KEY_6 's'
-#define KEY_7 'd'
-#define KEY_8 'f'
 
 // Pins used by the buttons
-#define PIN_1 21
-#define PIN_2 20
-#define PIN_3 19
-#define PIN_4 18
-#define PIN_5 15
-#define PIN_6 14
-#define PIN_7 16
-#define PIN_8 10
+#define PIN_1 7
+#define PIN_2 8
 
-// Pins used by the LEDs
-#define LED_1 2
-#define LED_2 3
-#define LED_3 4
-#define LED_4 5
-#define LED_5 6
-#define LED_6 7
-#define LED_7 8
-#define LED_8 9
+// Pins used by the RGB LEDs
+#define PIN_LED_1R 3
+#define PIN_LED_1CA 4
+#define PIN_LED_1G 5
+#define PIN_LED_1B 6
+
+#define PIN_LED_2R 13
+#define PIN_LED_2CA 12
+#define PIN_LED_2G 11
+#define PIN_LED_2B 10
 
 // Arrays used for the for-loop sections of this program
-const byte pinArray[NUMKEYS] = {
-  PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8 
-};
+const byte pinArray[NUMKEYS] = {PIN_1, PIN_2};
 
-const byte keyArray[NUMKEYS] = {
-  KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8
-};
+const byte keyArray[NUMKEYS] = {KEY_1, KEY_2};
 
-const byte ledArray[NUMKEYS] = {
-  LED_1, LED_2, LED_3, LED_4, LED_5, LED_6, LED_7, LED_8
-};
+const byte ledArrayR[NUMKEYS] = {PIN_LED_1R, PIN_LED_2R};
+const byte ledArrayCA[NUMKEYS] = {PIN_LED_1CA, PIN_LED_2CA};
+const byte ledArrayG[NUMKEYS] = {PIN_LED_1G, PIN_LED_2G};
+const byte ledArrayB[NUMKEYS] = {PIN_LED_1B, PIN_LED_2B};
+
+const byte LED_1R = 98;   //  98 = 1.9V
+const byte LED_1G = 159;  // 159 = 3.1V
+const byte LED_1B = 153;  // 153 = 3.0V
+
+const byte LED_2R = 98;   //  98 = 1.9V
+const byte LED_2G = 159;  // 159 = 3.1V
+const byte LED_2B = 153;  // 153 = 3.0V
+
+byte ledIntensityR[NUMKEYS] = {255 - LED_1R, 255 - LED_2R};
+byte ledIntensityG[NUMKEYS] = {255 - LED_1G, 255 - LED_2G};
+byte ledIntensityB[NUMKEYS] = {255 - LED_1B, 255 - LED_2B};
 
 Bounce button[NUMKEYS];
 
 void setup() {
 
-  for(uint8_t i = 0; i < NUMKEYS ; i++){
+  for (uint8_t i = 0; i < NUMKEYS; i++) {
 
     // Initialize buttons w/ debounce code
     button[i] = Bounce();
     button[i].attach(pinArray[i], INPUT_PULLUP);
-    button[i].interval(5);
+    button[i].interval(1);
 
-    // Initialize LEDs
-    pinMode(ledArray[i], OUTPUT);
+    // Initialize RGB LEDs
+    pinMode(ledArrayR[i], OUTPUT);
+    pinMode(ledArrayCA[i], OUTPUT);
+    pinMode(ledArrayG[i], OUTPUT);
+    pinMode(ledArrayB[i], OUTPUT);
+
+    analogWrite(ledArrayR[i], ledIntensityR[i]);
+    digitalWrite(ledArrayCA[i], HIGH);
+    analogWrite(ledArrayG[i], ledIntensityG[i]);
+    analogWrite(ledArrayB[i], ledIntensityB[i]);
   }
 }
 
 void loop() {
 
   // Scan each button individually
-  for(uint8_t i = 0; i < NUMKEYS; i++){
+  for (uint8_t i = 0; i < NUMKEYS; i++) {
     button[i].update();
-    
-    if(button[i].fell()){
+
+    if (button[i].fell()) {
       Keyboard.press(keyArray[i]);
-      digitalWrite(ledArray[i], HIGH);
+      
+      byte ledIntensityR[NUMKEYS] = {255, 157};
+      byte ledIntensityG[NUMKEYS] = {96, 96};
+      byte ledIntensityB[NUMKEYS] = {102, 255};
+      
+      analogWrite(ledArrayR[i], ledIntensityR[i]);
+      analogWrite(ledArrayG[i], ledIntensityG[i]);
+      analogWrite(ledArrayB[i], ledIntensityB[i]);
     }
-    if(button[i].rose()){
+    if (button[i].rose()) {
       Keyboard.release(keyArray[i]);
-      digitalWrite(ledArray[i], LOW);     
+      
+      byte ledIntensityR[NUMKEYS] = {157, 255};
+      byte ledIntensityG[NUMKEYS] = {96, 96};
+      byte ledIntensityB[NUMKEYS] = {255, 102};
+      
+      analogWrite(ledArrayR[i], ledIntensityR[i]);
+      analogWrite(ledArrayG[i], ledIntensityG[i]);
+      analogWrite(ledArrayB[i], ledIntensityB[i]);
     }
   }
 }
