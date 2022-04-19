@@ -66,8 +66,8 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 // Arrays used for the for-loop sections of this program
 const byte PIN_ARRAY[NUM_KEYS] = {PIN_1, PIN_2};
 const byte KEY_ARRAY[NUM_KEYS] = {KEY_1, KEY_2};
-const byte LED_ARRAY_COM[NUM_KEYS] = {PIN_LED_1_COM, PIN_LED_2_COM};
-const byte LED_ARRAY_RGB[NUM_KEYS][3] = {{PIN_LED_1_RED, PIN_LED_1_GREEN, PIN_LED_1_BLUE},
+const byte LED_ARRAY_COM[NUM_LEDS] = {PIN_LED_1_COM, PIN_LED_2_COM};
+const byte LED_ARRAY_RGB[NUM_LEDS][3] = {{PIN_LED_1_RED, PIN_LED_1_GREEN, PIN_LED_1_BLUE},
                                         {PIN_LED_2_RED, PIN_LED_2_GREEN, PIN_LED_2_BLUE}};
 
 Bounce button[NUM_KEYS];
