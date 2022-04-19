@@ -1,7 +1,7 @@
 /*
  
 Copyright (c) 2019, Charles Garcia
-Copyright (c) 2021, Dario Tabares
+Copyright (c) 2021 - 2022, Dario Tabares
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 #include <Bounce2.h>
 
 // Change if adding more or less buttons
-#define NUMKEYS 2
+#define NUM_KEYS 2
 
 // Edit the buttons you want pressed here
 #define KEY_1 'z'
@@ -44,90 +44,120 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 #define PIN_1 7
 #define PIN_2 8
 
-// Pins used by the RGB LEDs
-#define PIN_LED_1R 3
-#define PIN_LED_1CA 4
-#define PIN_LED_1G 5
-#define PIN_LED_1B 6
+// Change if adding more or less LEDs
+#define NUM_LEDS 2
 
-#define PIN_LED_2R 13
-#define PIN_LED_2CA 12
-#define PIN_LED_2G 11
-#define PIN_LED_2B 10
+// Using PWM to limit LED current
+#define LED_RED_MAX_LIMIT 98    //  98 = 1.9V MAX
+#define LED_GREEN_MAX_LIMIT 159 // 159 = 3.1V MAX
+#define LED_BLUE_MAX_LIMIT 153  // 153 = 3.0V MAX
+
+// Pins used by the RGB LEDs
+#define PIN_LED_1_RED 3
+#define PIN_LED_1_COM 4
+#define PIN_LED_1_GREEN 5
+#define PIN_LED_1_BLUE 6
+
+#define PIN_LED_2_RED 13
+#define PIN_LED_2_COM 12
+#define PIN_LED_2_GREEN 11
+#define PIN_LED_2_BLUE 10
 
 // Arrays used for the for-loop sections of this program
-const byte pinArray[NUMKEYS] = {PIN_1, PIN_2};
+const byte PIN_ARRAY[NUM_KEYS] = {PIN_1, PIN_2};
+const byte KEY_ARRAY[NUM_KEYS] = {KEY_1, KEY_2};
+const byte LED_ARRAY_COM[NUM_KEYS] = {PIN_LED_1_COM, PIN_LED_2_COM};
+const byte LED_ARRAY_RGB[NUM_KEYS][3] = {{PIN_LED_1_RED, PIN_LED_1_GREEN, PIN_LED_1_BLUE},
+                                        {PIN_LED_2_RED, PIN_LED_2_GREEN, PIN_LED_2_BLUE}};
 
-const byte keyArray[NUMKEYS] = {KEY_1, KEY_2};
+Bounce button[NUM_KEYS];
 
-const byte ledArrayR[NUMKEYS] = {PIN_LED_1R, PIN_LED_2R};
-const byte ledArrayCA[NUMKEYS] = {PIN_LED_1CA, PIN_LED_2CA};
-const byte ledArrayG[NUMKEYS] = {PIN_LED_1G, PIN_LED_2G};
-const byte ledArrayB[NUMKEYS] = {PIN_LED_1B, PIN_LED_2B};
-
-const byte LED_1R = 98;   //  98 = 1.9V
-const byte LED_1G = 159;  // 159 = 3.1V
-const byte LED_1B = 153;  // 153 = 3.0V
-
-const byte LED_2R = 98;   //  98 = 1.9V
-const byte LED_2G = 159;  // 159 = 3.1V
-const byte LED_2B = 153;  // 153 = 3.0V
-
-byte ledIntensityR[NUMKEYS] = {255 - LED_1R, 255 - LED_2R};
-byte ledIntensityG[NUMKEYS] = {255 - LED_1G, 255 - LED_2G};
-byte ledIntensityB[NUMKEYS] = {255 - LED_1B, 255 - LED_2B};
-
-Bounce button[NUMKEYS];
+// Change to false if your LEDs are not Common Anode
+const bool IS_LED_COMMON_ANODE = true;
 
 void setup() {
 
-  for (uint8_t i = 0; i < NUMKEYS; i++) {
+  byte ledRGBIntensity[NUM_LEDS][3] = {{0, 16, 15},
+                                       {10, 0, 15}};
 
+  for (byte i = 0; i < NUM_KEYS; i++) {
     // Initialize buttons w/ debounce code
     button[i] = Bounce();
-    button[i].attach(pinArray[i], INPUT_PULLUP);
+    button[i].attach(PIN_ARRAY[i], INPUT_PULLUP);
     button[i].interval(1);
 
     // Initialize RGB LEDs
-    pinMode(ledArrayR[i], OUTPUT);
-    pinMode(ledArrayCA[i], OUTPUT);
-    pinMode(ledArrayG[i], OUTPUT);
-    pinMode(ledArrayB[i], OUTPUT);
-
-    analogWrite(ledArrayR[i], ledIntensityR[i]);
-    digitalWrite(ledArrayCA[i], HIGH);
-    analogWrite(ledArrayG[i], ledIntensityG[i]);
-    analogWrite(ledArrayB[i], ledIntensityB[i]);
+    if (ledRGBIntensity[i][0] > LED_RED_MAX_LIMIT) {
+      ledRGBIntensity[i][0] = LED_RED_MAX_LIMIT;
+    }
+    if (ledRGBIntensity[i][1] > LED_GREEN_MAX_LIMIT) {
+      ledRGBIntensity[i][1] = LED_GREEN_MAX_LIMIT;
+    }
+    if (ledRGBIntensity[i][2] > LED_BLUE_MAX_LIMIT) {
+      ledRGBIntensity[i][2] = LED_BLUE_MAX_LIMIT;
+    }
+    for (byte j = 0; j < 3; j++) {
+      pinMode(LED_ARRAY_RGB[i][j], OUTPUT);
+      if (IS_LED_COMMON_ANODE == true) {
+        ledRGBIntensity[i][j] = 255 - ledRGBIntensity[i][j];
+      }
+      analogWrite(LED_ARRAY_RGB[i][j], ledRGBIntensity[i][j]);
+    }
+    pinMode(LED_ARRAY_COM[i], OUTPUT);
+    if (IS_LED_COMMON_ANODE == true) {
+      digitalWrite(LED_ARRAY_COM[i], HIGH);
+    } else {
+      digitalWrite(LED_ARRAY_COM[i], LOW);
+    }
   }
 }
 
 void loop() {
 
   // Scan each button individually
-  for (uint8_t i = 0; i < NUMKEYS; i++) {
+  for (byte i = 0; i < NUM_KEYS; i++) {
     button[i].update();
 
     if (button[i].fell()) {
-      Keyboard.press(keyArray[i]);
-      
-      byte ledIntensityR[NUMKEYS] = {255, 157};
-      byte ledIntensityG[NUMKEYS] = {96, 96};
-      byte ledIntensityB[NUMKEYS] = {102, 255};
-      
-      analogWrite(ledArrayR[i], ledIntensityR[i]);
-      analogWrite(ledArrayG[i], ledIntensityG[i]);
-      analogWrite(ledArrayB[i], ledIntensityB[i]);
+      Keyboard.press(KEY_ARRAY[i]);
+      byte ledRGBIntensity[NUM_LEDS][3] = {{0, 255, 255},
+                                           {255, 0, 255}};
+      if (ledRGBIntensity[i][0] > LED_RED_MAX_LIMIT) {
+        ledRGBIntensity[i][0] = LED_RED_MAX_LIMIT;
+      }
+      if (ledRGBIntensity[i][1] > LED_GREEN_MAX_LIMIT) {
+        ledRGBIntensity[i][1] = LED_GREEN_MAX_LIMIT;
+      }
+      if (ledRGBIntensity[i][2] > LED_BLUE_MAX_LIMIT) {
+        ledRGBIntensity[i][2] = LED_BLUE_MAX_LIMIT;
+      }
+      for (byte j = 0; j < 3; j++) {
+        if (IS_LED_COMMON_ANODE == true) {
+          ledRGBIntensity[i][j] = 255 - ledRGBIntensity[i][j];
+        }
+        analogWrite(LED_ARRAY_RGB[i][j], ledRGBIntensity[i][j]);
+      }
     }
+
     if (button[i].rose()) {
-      Keyboard.release(keyArray[i]);
-      
-      byte ledIntensityR[NUMKEYS] = {157, 255};
-      byte ledIntensityG[NUMKEYS] = {96, 96};
-      byte ledIntensityB[NUMKEYS] = {255, 102};
-      
-      analogWrite(ledArrayR[i], ledIntensityR[i]);
-      analogWrite(ledArrayG[i], ledIntensityG[i]);
-      analogWrite(ledArrayB[i], ledIntensityB[i]);
+      Keyboard.release(KEY_ARRAY[i]);
+      byte ledRGBIntensity[NUM_LEDS][3] = {{0, 16, 15},
+                                          {10, 0, 15}};
+      if (ledRGBIntensity[i][0] > LED_RED_MAX_LIMIT) {
+        ledRGBIntensity[i][0] = LED_RED_MAX_LIMIT;
+      }
+      if (ledRGBIntensity[i][1] > LED_GREEN_MAX_LIMIT) {
+        ledRGBIntensity[i][1] = LED_GREEN_MAX_LIMIT;
+      }
+      if (ledRGBIntensity[i][2] > LED_BLUE_MAX_LIMIT) {
+        ledRGBIntensity[i][2] = LED_BLUE_MAX_LIMIT;
+      }
+      for (byte j = 0; j < 3; j++) {
+        if (IS_LED_COMMON_ANODE == true) {
+          ledRGBIntensity[i][j] = 255 - ledRGBIntensity[i][j];
+        }
+        analogWrite(LED_ARRAY_RGB[i][j], ledRGBIntensity[i][j]);
+      }
     }
   }
 }
