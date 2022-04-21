@@ -100,8 +100,9 @@ void setup() {
       analogWrite(LED_ARRAY_RGB[i][j], ledRGBIntensity[i][j]);
     }
     pinMode(LED_ARRAY_COM[i], OUTPUT);
-    (IS_LED_COMMON_ANODE == true) ?
-      digitalWrite(LED_ARRAY_COM[i], HIGH) :
+    if (IS_LED_COMMON_ANODE == true)
+      digitalWrite(LED_ARRAY_COM[i], HIGH);
+    else
       digitalWrite(LED_ARRAY_COM[i], LOW);
   }
 }
