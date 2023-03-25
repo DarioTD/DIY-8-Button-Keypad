@@ -41,8 +41,9 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 #define KEY_2 'x'
 
 // Pins used by the buttons
-#define PIN_1 7
-#define PIN_2 8
+#define PIN_1 A0
+#define PIN_2 A1
+#define PIN_COM A2
 
 #define R_G_B 3
 // Change if adding more or less LEDs
@@ -54,15 +55,15 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 #define LED_BLUE_MAX_LIMIT 153  // 153 = 3.0V MAX
 
 // Pins used by the RGB LEDs
-#define PIN_LED_1_RED 3
-#define PIN_LED_1_COM 4
-#define PIN_LED_1_GREEN 5
-#define PIN_LED_1_BLUE 6
+#define PIN_LED_1_RED 13
+#define PIN_LED_1_COM 12
+#define PIN_LED_1_GREEN 11
+#define PIN_LED_1_BLUE 10
 
-#define PIN_LED_2_RED 13
-#define PIN_LED_2_COM 12
-#define PIN_LED_2_GREEN 11
-#define PIN_LED_2_BLUE 10
+#define PIN_LED_2_RED 3
+#define PIN_LED_2_COM 4
+#define PIN_LED_2_GREEN 5
+#define PIN_LED_2_BLUE 6
 
 // Arrays used for the for-loop sections of this program
 const byte PIN_ARRAY[NUM_KEYS] = {PIN_1, PIN_2};
@@ -99,6 +100,7 @@ void setup() {
         ledRGBIntensity[i][j] = 255 - ledRGBIntensity[i][j];
       analogWrite(LED_ARRAY_RGB[i][j], ledRGBIntensity[i][j]);
     }
+    pinMode(PIN_COM, OUTPUT);
     pinMode(LED_ARRAY_COM[i], OUTPUT);
     if (IS_LED_COMMON_ANODE == true)
       digitalWrite(LED_ARRAY_COM[i], HIGH);
