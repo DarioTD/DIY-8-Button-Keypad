@@ -63,7 +63,7 @@ either expressed or implied, of the DIY-8-Button-Keypad project.
 const byte PIN[NUM_KEYS] = {PIN_1, PIN_2};
 const byte KEY[NUM_KEYS] = {KEY_1, KEY_2};
 const byte LED_COM[NUM_LEDS] = {PIN_LED_1_COM, PIN_LED_2_COM};
-const byte LED_RGB[NUM_LEDS][3] = {{PIN_LED_1_RED, PIN_LED_1_GREEN, PIN_LED_1_BLUE},
+const byte LED_PIN[NUM_LEDS][3] = {{PIN_LED_1_RED, PIN_LED_1_GREEN, PIN_LED_1_BLUE},
                                    {PIN_LED_2_RED, PIN_LED_2_GREEN, PIN_LED_2_BLUE}};
 // Using PWM to limit LED current
 const byte LED_MAX_CURRENT[3] = {98, 159, 153}; // RED: 1.9V, GREEN: 3.1V, BLUE: 3.0V MAX
@@ -90,8 +90,8 @@ void setup() {
       if (IS_LED_COMMON_ANODE == true)
         ledIntensity[i][j] = 255 - ledIntensity[i][j];
 
-      pinMode(LED_RGB[i][j], OUTPUT);
-      analogWrite(LED_RGB[i][j], ledIntensity[i][j]);
+      pinMode(LED_PIN[i][j], OUTPUT);
+      analogWrite(LED_PIN[i][j], ledIntensity[i][j]);
     }
     pinMode(PIN_COM, OUTPUT);
     pinMode(LED_COM[i], OUTPUT);
@@ -118,7 +118,7 @@ void loop() {
         if (IS_LED_COMMON_ANODE == true)
           ledIntensity[i][j] = 255 - ledIntensity[i][j];
 
-        analogWrite(LED_RGB[i][j], ledIntensity[i][j]);
+        analogWrite(LED_PIN[i][j], ledIntensity[i][j]);
       }
     }
 
@@ -132,7 +132,7 @@ void loop() {
         if (IS_LED_COMMON_ANODE == true)
           ledIntensity[i][j] = 255 - ledIntensity[i][j];
 
-        analogWrite(LED_RGB[i][j], ledIntensity[i][j]);
+        analogWrite(LED_PIN[i][j], ledIntensity[i][j]);
       }
     }
   }
